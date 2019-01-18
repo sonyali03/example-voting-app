@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta1
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/sonyali03/example-voting-app:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/sonyali03/example-voting-app:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: example-voting-app
+        chartPath: charts/example-voting-app
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/sonyali03/example-voting-app'
+          image.tag: '{{.DIGEST_HEX}}'
